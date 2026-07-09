@@ -1,0 +1,16 @@
+build/
+*.vvp
+*.vcd
+fir_vectors.txt
+mult_vectors.txt
+!sim/fir_vectors.txt
+!sim/mult_vectors.txt
+# Gowin
+impl/
+*.fs
+*.bit
+gwsynthesis/
+*.rpt.html
+__pycache__/
+*.pyc
+*.npy
