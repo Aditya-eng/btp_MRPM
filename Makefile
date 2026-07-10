@@ -4,9 +4,9 @@ VV = vvp
 RTL = rtl/han_carlson_adder.v rtl/adder_variants.v rtl/mrpm_radix4.v rtl/mrpm_radix4_wide.v
 VEC = sim/fir_vectors.txt sim/mult_vectors.txt
 
-.PHONY: all mult fold fir pipe sweep clean
+.PHONY: all mult fold fir pipe sweep fir16 clean
 
-all: mult fold fir pipe
+all: mult fold fir pipe fir16
 
 mult:
 	$(IV) -o build/mult.vvp rtl/han_carlson_adder.v rtl/mrpm_radix4.v sim/tb_mrpm.v
@@ -44,7 +44,15 @@ sweep:
 	done
 	rm -f fir_vectors.txt
 
+# TASK 4: 16-tap symmetric-folded FIR (8 multipliers). Vectors are generated
+# by python/gencoef16.py + python/golden16.py into sim/fir16_vectors.txt.
+fir16:
+	cp sim/fir16_vectors.txt .
+	$(IV) -o build/fir16.vvp rtl/han_carlson_adder.v rtl/mrpm_radix4_wide.v rtl/fir16_fold.v sim/tb_fir16_fold.v
+	$(VV) build/fir16.vvp
+	rm -f fir16_vectors.txt
+
 clean:
-	rm -rf build/*.vvp fir.vcd fir_vectors.txt
+	rm -rf build/*.vvp fir.vcd fir_vectors.txt fir16_vectors.txt
 
 $(shell mkdir -p build)
