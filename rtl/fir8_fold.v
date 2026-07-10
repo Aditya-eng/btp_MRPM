@@ -5,6 +5,13 @@
 // Pre-add: (d[i]+d[7-i]) is 9-bit signed; multiplier 9x8.
 // Output: full precision, 20-bit signed.
 // ============================================================
+// TASK 2 adder sweep: the FIR-tree adder is selected at compile time.
+// Default is han_carlson_adder so existing builds are byte-for-byte unchanged.
+// Swap for the sweep with e.g. -D FIR_ADDER=kogge_stone_adder (all four
+// variants in adder_variants.v share the han_carlson_adder port list).
+`ifndef FIR_ADDER
+`define FIR_ADDER han_carlson_adder
+`endif
 module fir8_fold #(
     parameter IW = 8,
     parameter CW = 8,
@@ -44,9 +51,9 @@ module fir8_fold #(
     wire signed [OW-1:0] p3 = {{(OW-17){m3[16]}}, m3};
 
     wire signed [OW-1:0] t0,t1,t2;
-    han_carlson_adder #(.WIDTH(OW)) T0(.a(p0),.b(p1),.cin(1'b0),.sum(t0),.cout());
-    han_carlson_adder #(.WIDTH(OW)) T1(.a(p2),.b(p3),.cin(1'b0),.sum(t1),.cout());
-    han_carlson_adder #(.WIDTH(OW)) T2(.a(t0),.b(t1),.cin(1'b0),.sum(t2),.cout());
+    `FIR_ADDER #(.WIDTH(OW)) T0(.a(p0),.b(p1),.cin(1'b0),.sum(t0),.cout());
+    `FIR_ADDER #(.WIDTH(OW)) T1(.a(p2),.b(p3),.cin(1'b0),.sum(t1),.cout());
+    `FIR_ADDER #(.WIDTH(OW)) T2(.a(t0),.b(t1),.cin(1'b0),.sum(t2),.cout());
 
     always @(posedge clk) begin
         if (rst) begin
