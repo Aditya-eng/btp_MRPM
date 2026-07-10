@@ -1,0 +1,5 @@
+adder,fir_tree_depth,sim_functional,sim_mismatches,lut4,ff,fmax_mhz,dyn_power_mw,notes
+han_carlson_adder,log2(20)+1,PASS,0,PENDING_GOWIN,PENDING_GOWIN,PENDING_GOWIN,PENDING_GOWIN,baseline (default FIR_ADDER)
+kogge_stone_adder,log2(20),PASS,0,PENDING_GOWIN,PENDING_GOWIN,PENDING_GOWIN,PENDING_GOWIN,min depth / max cells+wiring
+brent_kung_adder,2*log2(20)-1,PASS,0,PENDING_GOWIN,PENDING_GOWIN,PENDING_GOWIN,PENDING_GOWIN,min cells / higher depth
+sklansky_adder,log2(20),PASS,0,PENDING_GOWIN,PENDING_GOWIN,PENDING_GOWIN,PENDING_GOWIN,min depth / high fanout
