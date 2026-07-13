@@ -99,20 +99,39 @@ Han-Carlson — hence small deltas. (HC ≡ KS in this RTL, see note above.)
 
 ---
 
-## Comparison vs base paper [1] (Nexys A7)
+## Comparison vs base paper [1] (from its Table 1 & Table 2)
 
-| Metric | This work (Tang Nano 9K, folded B) | Base paper [1] (Nexys A7) | Notes |
-|---|---|---|---|
-| LUT | 222 (LUT4) | [verify against [1] Table 2] | different fabric/vendor |
-| FF | 44 | [verify] | delay line maps to LUT-SR here |
-| DSP | **0** | [verify] | our LUT-only claim, confirmed |
-| Fmax | 42.956 (B) / 66.471 (C, pipelined) | [verify] | |
-| Signed support | Yes | No | architectural delta |
+Base paper measures a **standalone 8-bit *unsigned* multiplier** on a **Nexys A7
+(XC7A100T)**; this work measures a full **8-tap signed FIR** on Tang Nano 9K. So the
+rows are NOT apples-to-apples — read with the caveats below.
 
-State the fabric difference (Gowin GW1NR-9 LUT4 vs Xilinx Nexys A7 6-input LUT)
-explicitly — LUT counts are **not 1:1 comparable** across vendors; lead with the
-*architectural* deltas (signed, radix-4, fold, DSP=0) and use absolute area only
-within this fabric.
+| Metric | This work (Tang Nano 9K, GW1NR-9C) | Base paper [1] (Nexys A7, XC7A100T) |
+|---|---|---|
+| Unit measured | full 8-tap FIR (folded, 4 mults) | one 8-bit multiplier |
+| Signed | **Yes** | No (unsigned) |
+| LUT | 222 LUT4 (folded) / 345 (direct) | 68 LUTs (Table 1/2) |
+| FF (registers) | 44 | 58 |
+| DSP | **0** (confirmed) | not reported (LUT-based) |
+| Fmax | 42.96 (folded) / 66.47 (pipelined) MHz | 0.714 MHz |
+| Critical-path delay | — (not captured) | 17.217 ns |
+| Dynamic power | 2.595 mW | 1.136 W (see note) |
+
+Base paper Table 2 (8-bit multiplier LUT comparison, for context): Proposed MRPM **68**,
+Vedic [4] 114, Array [4] 116, Booth [4] 118, Vedic+Kogge-Stone [17] 309, Reduced-complexity
+Wallace [6] 224 LUTs.
+
+**Caveats — state these; do not overclaim:**
+1. **Multiplier vs FIR.** Their 68 LUT / 0.714 MHz / 1.136 W is one multiplier; our 222 LUT
+   is a whole FIR (4 multipliers + adder tree + delay line). For a true like-for-like, also
+   synthesize our standalone `mrpm_radix4` (8×8) on this flow — recommended extra run.
+2. **Fmax gap (0.714 → 42.96/66.47 MHz).** Their multiplier is *iterative* (~8 cycles);
+   ours uses a *combinational* radix-4 multiplier. The >60× gap reflects iterative-vs-parallel
+   architecture, not tuning alone — a strong qualitative point, not a clean 1:1 speedup.
+3. **Power W vs mW.** They report 1.136 W, we report 2.595 mW (~440×). Almost certainly
+   different tools/toggle-rate methodology (1.1 W for a 68-LUT design is implausible). Do NOT
+   claim a power win; flag the methodology difference.
+4. **Fabric.** Gowin GW1NR-9 LUT4 vs Xilinx 6-input LUT — counts not 1:1. Lead with the
+   *architectural* deltas (signed, radix-4, fold, pipeline, DSP=0).
 
 ---
 
