@@ -1,7 +1,11 @@
 # [PAPER SKELETON] Pipelined Signed Radix-4 MRPM with Han-Carlson Adder for ECG/EEG FIR Filtering
 
-Authors: [Author], [co-authors], [advisor]
+Authors: Aditya Garg, Ashu Anand
 Target venue: IEEE conference (ISVLSI / VLSID / iSES) or Integration journal.
+
+> **A complete draft now exists: `docs/paper/paper.tex` (compiled: `docs/paper/paper.pdf`).**
+> This skeleton is kept as historical planning context; treat the .tex file as the
+> authoritative current draft.
 
 ---
 

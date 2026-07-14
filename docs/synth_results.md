@@ -97,6 +97,37 @@ Han-Carlson — hence small deltas. (HC ≡ KS in this RTL, see note above.)
   no advantage at this width. **Recommendation for the design: Han-Carlson/Kogge-Stone
   for area-optimal, Sklansky if Fmax-bound.**
 
+## Analysis 4 — Standalone multiplier (8×8, radix-4 MRPM) vs base paper [1]
+
+Synthesized `mrpm_radix4` alone (no filter around it) through the same DSP-disabled
+flow, to get a true multiplier-vs-multiplier number against [1]'s Table 1 (68 LUT).
+
+| Metric | This work (standalone 8×8 MRPM) | Base paper [1] (unsigned RPM) |
+|---|---|---|
+| LUT4 / LUT | **170** | 68 |
+| FF | 0 (purely combinational) | 58 |
+| DSP | 0 | not reported |
+| I/O ports | 32 | 36 |
+| Rate | single-cycle | 0.714 MHz (iterative, ~8 cycles) |
+| Signed | Yes | No |
+
+**Honest reading — the multiplier alone is *larger*, not smaller.** 170 LUT4 > 68 LUT.
+This is not a measurement problem; it is the direct, intended cost of two design
+choices: (1) **signedness** — sign extension + conditional two's-complement negation
+at every Booth digit, which an unsigned datapath does not pay for; (2) **parallelism**
+— 4 partial-product generators + a summation tree instantiated *in space*, vs. [1]'s
+single adder reused *in time* over ~8 iterations. This is the classical area–time
+trade-off; the counterpart of the LUT gap is [1]'s 0.714 MHz result rate.
+
+**Why this doesn't undermine the filter-level area claim:** 4 standalone multipliers
+would cost ≈4×170 = 680 LUT4, yet the whole folded filter (4 multipliers + delay line +
+pre-adders + adder tree) measures 222 LUT4 (Table 1). The gap is **constant-coefficient
+specialization** — inside the filter each multiplier's second operand is a *fixed*
+coefficient, and the synthesizer collapses that logic aggressively (it eliminates the
+`H0=0` multiplier entirely). So the standalone number is a poor predictor of the
+deployed one. The paper's area claim rests on the **filter-level, like-for-like,
+same-fabric** comparison (345→222 LUT4, §Analysis 1), not on the standalone multiplier.
+
 ---
 
 ## Comparison vs base paper [1] (from its Table 1 & Table 2)
@@ -137,8 +168,17 @@ Wallace [6] 224 LUTs.
 
 ## Open items before submission
 
-1. Fill the base-paper column from [1] (Table 2) — currently `[verify]`.
-2. (Optional) capture per-module hierarchical LUT4 for the Analysis-1 attribution split.
-3. (Optional) record the exact Power Analyzer toggle-rate setting used.
-4. (Optional) implement the true Han-Carlson schedule if a distinct HC-vs-KS row is
-   wanted; otherwise present HC and KS as one design point.
+1. ~~Fill the base-paper column from [1] (Table 2).~~ Done — see comparison table above
+   and `docs/paper/paper.tex` §VI-D/VI-E (base-paper Table 1/2 quoted directly from PDF).
+2. ~~Standalone multiplier vs base-paper multiplier.~~ Done — Analysis 4 above.
+3. (Optional) capture per-module hierarchical LUT4 for the Analysis-1 attribution split.
+4. (Optional) record the exact Power Analyzer toggle-rate setting used.
+5. (Optional) implement the true Han-Carlson schedule if a distinct HC-vs-KS row is
+   wanted; otherwise present HC and KS as one design point (current paper draft treats
+   HC and KS as one design point, per Section VI-C's disclosure).
+
+**Paper draft status:** a complete draft exists at `docs/paper/paper.tex` (compiled:
+`docs/paper/paper.pdf`), authored by Aditya Garg and Ashu Anand. Remaining TODOs are
+listed in the header comment of the .tex file (author affiliations/emails, optional
+GTKWave waveform figure, and independently re-verifying the base-paper Table 2 figures
+quoted in Section VI-D against the source PDF one more time before submission).
