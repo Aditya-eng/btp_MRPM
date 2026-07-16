@@ -1,23 +1,7 @@
-%% ===================================================================
-%% An Area-Efficient Pipelined Signed Radix-4 MRPM for Biomedical
-%% FIR Filtering -- IEEE Conference format (IEEEtran)
-%%
-%% STATUS: complete draft. All hardware numbers are MEASURED from Gowin
-%% POST-PLACE-AND-ROUTE utilisation/timing/power reports (GW1NR-9C, DSP=0).
-%% The design was NOT downloaded to a board; no on-chip execution is
-%% claimed anywhere. All functional results are from simulation (0 mismatches).
-%%
-%% REMAINING TODO BEFORE SUBMISSION:
-%%   1. Author block: replace placeholder names/affiliations/emails.
-%%   2. Figures 1 and 2 are native TikZ (no external files needed).
-%%      Optionally add a third: GTKWave waveform (make fir -> fir.vcd),
-%%      the analogue of Fig. 5 in the base paper.
-%%   3. Verify the base-paper figures quoted in Sec. VI-D against the PDF.
-%%
-%% The \TBD macro is retained deliberately: if any future edit introduces
-%% an unmeasured number, use \TBD rather than a plausible-looking figure.
-%% ===================================================================
-
+% NOTE: paper.pdf in this folder was compiled BEFORE the citation-order and
+% per-equation-citation edits below (no LaTeX toolchain was available to
+% recompile at edit time). Recompile this .tex (e.g. via Overleaf) to
+% regenerate a matching PDF before using/submitting it.
 \documentclass[conference]{IEEEtran}
 
 \usepackage{cite}
@@ -60,18 +44,25 @@
 \title{An Area-Efficient Pipelined Signed Radix-4 Modified Russian
 Peasant Multiplier for Biomedical FIR Filtering}
 
+% \author{
+% \IEEEauthorblockN{Aditya Garg}
+% \IEEEauthorblockA{\textit{Dept.\ of Electronics and Communication Engineering} \\
+% \textit{Institution Name} \\
+% City, India \\
+% aditya.garg@email.com}
+% \and
+% \IEEEauthorblockN{Ashu Anand}
+% \IEEEauthorblockA{\textit{Dept.\ of Electronics and Communication Engineering} \\
+% \textit{Institution Name} \\
+% City, India \\
+% ashu.anand@email.com}
+% }
 \author{
-\IEEEauthorblockN{Aditya Garg}
-\IEEEauthorblockA{\textit{Dept.\ of Electronics and Communication Engineering} \\
-\textit{Institution Name} \\
-City, India \\
-aditya.garg@email.com}
-\and
-\IEEEauthorblockN{Ashu Anand}
-\IEEEauthorblockA{\textit{Dept.\ of Electronics and Communication Engineering} \\
-\textit{Institution Name} \\
-City, India \\
-ashu.anand@email.com}
+\IEEEauthorblockN{Aditya Garg, Ashu Anand, Gargi Singh, Aditya Mohan and Jyoti Yadav}
+\IEEEauthorblockA{\textit{Dept.\ of Instrumentation and Control Engineering} \\
+\textit{Netaji Subhas University of Technology (NSUT)} \\
+Delhi, India \\
+Email: \{aditya.garg.ug23, ashu.anand.ug23, gargi.singh.ug23, aditya.mohan.ug23, jyoti.yadav\}@nsut.ac.in}
 }
 
 \maketitle
@@ -91,7 +82,7 @@ shift-and-add iterations, while natively supporting two's-complement
 operands. Second, the linear-phase symmetry of the filter coefficients
 is exploited to \emph{fold} an 8-tap FIR onto four multipliers instead
 of eight, reducing LUT4 utilisation of the complete filter from 345 to
-222 --- a saving of 35.7\% --- with bit-identical output. Third, the folded datapath is pipelined into four stages,
+222 - a saving of 35.7\% - with bit-identical output. Third, the folded datapath is pipelined into four stages,
 raising the maximum clock frequency by $1.55\times$ (42.96~MHz to
 66.47~MHz). Fourth, four parallel-prefix adder topologies are
 synthesised on a common fabric; we find that at 8-bit datapath width
@@ -128,7 +119,7 @@ must simultaneously satisfy three requirements that ordinarily trade
 off against one another: computational accuracy, resource efficiency,
 and low power.
 
-Classical multiplier architectures --- array, Booth, Wallace-tree and
+Classical multiplier architectures - array, Booth, Wallace-tree and
 Vedic designs \cite{phuse,prabhu,gokhale,bansal} --- have been studied
 extensively, but their resource utilisation remains high for
 resource-constrained deployment. A second family of designs achieves
@@ -145,7 +136,7 @@ operand and doubling the other, accumulating the doubled operand
 whenever the halved operand is odd. Because it reuses a small set of
 shift and add resources rather than generating and storing a full
 partial-product array, RPM is inherently compact. Recent work by
-Subramanian~\textit{et al.}~\cite{base} proposed a Modified Russian
+TN, Deepika Sree, and S. Aditya~\cite{base} proposed a Modified Russian
 Peasant Multiplier (MRPM) that couples this algorithm with a
 Kogge-Stone parallel-prefix adder, and demonstrated its suitability for
 biomedical applications on an FPGA platform. That work is the direct
@@ -155,26 +146,26 @@ Building on \cite{base}, we observe five opportunities for further
 optimisation that the base architecture leaves open:
 
 \begin{enumerate}
-  \item \textbf{Unsigned operands only.} Biomedical signal processing
+  \item \textbf{Unsigned operands only:} Biomedical signal processing
   routinely involves differential and mean-removed signals, which are
   inherently signed. An unsigned multiplier requires external sign
   handling, adding logic outside the multiplier boundary.
 
-  \item \textbf{Iteration-bound throughput.} RPM consumes approximately
+  \item \textbf{Iteration-bound throughput:} RPM consumes approximately
   one multiplier bit per iteration, requiring on the order of eight
   iterations for an 8-bit operand. Accelerating the \emph{adder} inside
   a sequential loop reduces only the per-iteration cost; the iteration
   count itself remains the dominant term in end-to-end latency.
 
-  \item \textbf{No radix recoding.} The partial-product count is not
+  \item \textbf{No radix recoding:} The partial-product count is not
   reduced by radix-4 (or higher) recoding, although this is a standard
   and well-understood lever.
 
-  \item \textbf{No structural FIR optimisation.} When the multiplier is
+  \item \textbf{No structural FIR optimisation:} When the multiplier is
   deployed in an FIR filter, the linear-phase symmetry of the
   coefficient set is not exploited to reduce the multiplier count.
 
-  \item \textbf{Adder choice not swept.} A Kogge-Stone adder is adopted
+  \item \textbf{Adder choice not swept:} A Kogge-Stone adder is adopted
   without a comparative evaluation against other parallel-prefix
   topologies on the same fabric. Since the depth/cell-count/fan-out
   trade-off among prefix networks is strongly width-dependent, it is not
@@ -234,7 +225,7 @@ Section~\ref{sec:concl} concludes.
 Booth recoding \cite{prabhu} and Wallace-tree reduction \cite{abed}
 remain the standard techniques for reducing, respectively, the number
 of partial products and the depth of their summation. Vedic multipliers
-\cite{bansal,dhole,gokhale} exploit parallel sub-product formation and
+\cite{bansal,gokhale} exploit parallel sub-product formation and
 are frequently reported for FPGA targets; they favour speed at the cost
 of a larger hardware footprint, which limits their attractiveness in
 area-constrained biomedical deployment. Phuse and Tasgaonkar
@@ -278,7 +269,7 @@ relative to RPM realisations based on ripple-carry, carry-save and
 compressor-based adders. Reference \cite{rao} is the principal
 precedent for the adder choice made in this paper.
 
-Subramanian~\textit{et al.}~\cite{base} combine a modified RPM with a
+TN, Deepika Sree, and S. Aditya~\cite{base} combine a modified RPM with a
 Kogge-Stone adder and target biomedical workloads on an FPGA, reporting
 substantially reduced device utilisation relative to conventional
 multipliers. The present work adopts the same overall premise
@@ -318,9 +309,12 @@ The target application is the front-end low-pass filter of an
 electrocardiogram (ECG) acquisition chain. We assume a sampling rate of
 $f_s = 250$~Hz, typical of wearable ECG acquisition, and a low-pass
 cut-off of $f_c = 40$~Hz, which suppresses electromyographic and
-high-frequency noise while retaining the diagnostic band. The filter is
+high-frequency noise while retaining the diagnostic band, consistent
+with the power- and area-constrained biomedical acquisition context of
+\cite{lotfabadi,ajay}. The filter is
 an 8-tap linear-phase FIR designed by the windowed-sinc method with a
-Hamming window. Linear phase is not merely convenient: a non-linear
+Hamming window, following the RPM-based linear-phase FIR design practice
+of \cite{gunasekaran}. Linear phase is not merely convenient: a non-linear
 phase response distorts the morphology of the QRS complex, which is the
 feature on which most downstream ECG analysis depends. The resulting
 coefficient set, quantised to 8-bit signed integers with a scale factor
@@ -352,7 +346,8 @@ Section~\ref{sec:intro}.
 
 For each step $k \in \{0,1,2,3\}$ the recoder examines the bit triplet
 $(b_{2k+1},\, b_{2k},\, b_{2k-1})$, where the phantom bit
-$b_{-1} \equiv 0$. The control signals are
+$b_{-1} \equiv 0$, following the modified-Booth recoding convention of
+\cite{prabhu}. The control signals are
 
 \begin{align}
 \mathrm{one}_k &= b_{2k} \oplus b_{2k-1}, \label{eq:one}\\
@@ -363,9 +358,13 @@ $b_{-1} \equiv 0$. The control signals are
 \mathrm{neg}_k &= b_{2k+1}. \label{eq:neg}
 \end{align}
 
-\noindent The signals $\mathrm{one}_k$ and $\mathrm{two}_k$ are mutually
-exclusive by construction, so the partial-product magnitude is formed
-by selection rather than addition:
+\noindent The recoding rules \eqref{eq:one}, \eqref{eq:two}
+and \eqref{eq:neg} produce a signed digit in $\{-2,-1,0,+1,+2\}$ at each
+step, as in the standard Booth partial-product formation of \cite{prabhu}.
+The signals
+$\mathrm{one}_k$ and $\mathrm{two}_k$ are mutually exclusive by
+construction, so the partial-product magnitude is formed by selection
+rather than addition:
 
 \begin{equation}
 M_k = \mathrm{one}_k \cdot A \;\vee\; \mathrm{two}_k \cdot (A \ll 1),
@@ -374,7 +373,8 @@ M_k = \mathrm{one}_k \cdot A \;\vee\; \mathrm{two}_k \cdot (A \ll 1),
 
 \noindent where $A$ is the sign-extended multiplicand. The signed
 partial product is then obtained by conditional two's-complement
-negation and alignment:
+negation and alignment, extending the base MRPM datapath of \cite{base}
+with radix-4 recoding:
 
 \begin{equation}
 \mathrm{PP}_k = \big(\mathrm{neg}_k \;?\; (\overline{M_k} + 1)
@@ -406,7 +406,7 @@ principal structural saving relative to an iterative RPM datapath.
     \STATE $M_k \leftarrow \mathrm{one}_k \cdot A_{\mathrm{ext}}
             \;\vee\; \mathrm{two}_k \cdot (A_{\mathrm{ext}} \ll 1)$
     \STATE $\mathrm{PP}_k \leftarrow
-            (\mathrm{neg}_k \;?\; \overline{M_k}+1 \;:\; M_k) \ll 2k$
+            (\mathrm{neg}_k \;?\; (\overline{M_k}+1) \;:\; M_k) \ll 2k$
 \ENDFOR
 \STATE $S_0 \leftarrow \mathrm{HanCarlson}(\mathrm{PP}_0,\mathrm{PP}_1)$
 \STATE $S_1 \leftarrow \mathrm{HanCarlson}(\mathrm{PP}_2,\mathrm{PP}_3)$
@@ -504,16 +504,20 @@ hard-wired shifts and summed by a two-level parallel-prefix adder tree.}
 
 All additions --- both the partial-product accumulation of
 Algorithm~\ref{alg:mrpm} and the filter summation of
-Section~\ref{subsec:fold} --- are performed by a parallel-prefix adder.
-Pre-processing forms the bitwise generate and propagate terms
+Section~\ref{subsec:fold} --- are performed by a parallel-prefix adder,
+following the Han-Carlson adder formulation of \cite{rao}.
+Pre-processing forms the bitwise generate and propagate terms of
+\eqref{eq:gp},
 
 \begin{equation}
 g_i = a_i \cdot b_i, \qquad p_i = a_i \oplus b_i .
 \label{eq:gp}
 \end{equation}
 
-\noindent A logarithmic-depth prefix network then combines these terms;
-the carry into bit $i+1$ and the sum bit are
+\noindent A logarithmic-depth prefix network, of the kind analysed for
+Kogge-Stone-family adders in \cite{penchalaiah,raju}, then combines
+these terms; the carry into bit $i+1$ and the sum bit follow as
+\eqref{eq:sum},
 
 \begin{equation}
 c_{i+1} = G_i + (P_i \cdot c_{\mathrm{in}}), \qquad
@@ -521,7 +525,7 @@ s_i = p_i \oplus c_i ,
 \label{eq:sum}
 \end{equation}
 
-\noindent where $(G_i, P_i)$ denote the group generate and propagate
+\noindent in which $(G_i, P_i)$ denote the group generate and propagate
 signals at the output of the prefix network.
 
 Prefix topologies differ in how they trade depth against cell count and
@@ -558,7 +562,7 @@ produce identical arithmetic results (Section~\ref{sec:verif}).
 
 For a linear-phase FIR the coefficient set is symmetric,
 $h[i] = h[N-1-i]$, as is the case for \eqref{eq:coeffs}. The direct-form
-output
+output, as realised in the RPM-based FIR of \cite{gunasekaran},
 
 \begin{equation}
 y[n] = \sum_{i=0}^{N-1} h[i]\, x[n-i]
@@ -566,7 +570,8 @@ y[n] = \sum_{i=0}^{N-1} h[i]\, x[n-i]
 \end{equation}
 
 \noindent can therefore be regrouped by pairing each tap with its mirror
-image:
+image, a folding identity used for symmetric FIR realisation in
+\cite{kumar,gunasekaran}:
 
 \begin{equation}
 y[n] = \sum_{i=0}^{N/2-1} h[i]\,\big(x[n-i] + x[n-(N-1-i)]\big).
@@ -747,7 +752,9 @@ factor of $2^7$, so the datapath output is the true filter response
 scaled by $128$, and a deployed system applies a final arithmetic
 right-shift of seven places.
 
-Bit-growth is bounded as follows. Each mirror-pair pre-add of two
+Bit-growth is bounded as follows, using the standard fixed-point
+accumulator sizing analysis for FPGA multiply-accumulate datapaths of
+\cite{paz}. Each mirror-pair pre-add of two
 signed 8-bit samples requires one guard bit, giving a 9-bit operand.
 Each $9 \times 8$ product is 17 bits. The worst-case magnitude of the
 accumulated sum is bounded by
@@ -794,7 +801,7 @@ is driven by a single build target.
 \subsection{Target device and DSP-disabled implementation flow}
 
 The design targets the Gowin GW1NR-9C FPGA (8640 LUT4, 6480 flip-flops),
-the device carried by the Sipeed Tang Nano 9K board and a substantially
+the device carried by the Sipeed Tang Nano 9K board~\cite{tangnano} and a substantially
 lower-cost, lower-capacity part than the Xilinx Artix-7 used in
 \cite{base}. Results are reported after synthesis and place-and-route;
 the design was not downloaded to the device, and no claim of on-chip
@@ -944,7 +951,10 @@ multiplicand: the pre-add of two signed 8-bit samples produces a 9-bit
 operand, so the four surviving multipliers are $9 \times 8$ rather than
 $8 \times 8$, and each is individually more expensive than the units it
 replaces. Second, the four mirror-pair pre-adders are new logic that did
-not exist in the direct form. The realised saving is thus
+not exist in the direct form. The realised transformation, an
+instance of the multiplier-for-adder trade central to RPM-based folded
+FIR designs such as \cite{gunasekaran}, is thus given
+by \eqref{eq:foldcost},
 
 \begin{equation}
 8 \cdot M_{8\times8} \;\longrightarrow\;
@@ -1133,7 +1143,7 @@ The architectural comparison is summarised in Table~\ref{tab:base}.
 \centering
 \begin{tabular}{@{}lcc@{}}
 \toprule
- & \textbf{Base \cite{base}} & \textbf{This work} \\
+ & \textbf{Base \cite{base}} & \textbf{Proposed work} \\
 \midrule
 Standalone mult.\ area & 68 LUT (6-LUT)  & 170 LUT4 \\
 Complete FIR area    & not reported      & \textbf{222 LUT4} \\
@@ -1231,111 +1241,62 @@ variants of the multiplier alongside the radix-4 design reported here.
 
 \begin{thebibliography}{00}
 
-\bibitem{base}
-G.~S. Subramanian~V., D.~S. T.N., and Aditya~S., ``A low cost
-area-efficient modified Russian peasant multiplier (MRPM) for
-biomedical applications,'' \emph{Integration, the VLSI Journal},
-vol.~104, art.~102474, 2025.
-
 \bibitem{sharma}
-M.~Sharma and S.~K. Singh, ``New technique based Peasant multiplication
-for efficient signal processing applications,'' \emph{Indonesian J.
-Electr. Eng. Comput. Sci.}, vol.~8, no.~3, p.~726, 2017.
+Sharma, Mahendra, and Dr SK Singh. "New technique based Peasant multiplication for effcient signal processing applications." Indonesian Journal of Electrical Engineering and Computer Science 8, no. 3 (2017): 726-729.
 
 \bibitem{lotfabadi}
-S.~S. Lotfabadi, A.~Ye, and S.~Krishnan, ``Measuring the power
-efficiency of sub-threshold FPGAs for implementing portable biomedical
-applications,'' \emph{Microprocess. Microsyst.}, vol.~36, no.~3,
-pp.~151--158, 2012.
+Lotfabadi, Shahin Sanayei, Andy Ye, and Sridhar Krishnan. "Measuring the power efficiency of subthreshold FPGAs for implementing portable biomedical applications." Microprocessors and Microsystems 36, no. 3 (2012): 151-158.
 
 \bibitem{ajay}
-A.~Ajay and R.~M. Lourde, ``VLSI implementation of an improved
-multiplier for FFT computation in biomedical applications,'' in
-\emph{Proc. IEEE Comput. Soc. Annu. Symp. VLSI}, 2015, pp.~68--73.
+Ajay, Arathi, and R. Mary Lourde. "VLSI Implementation of an improved multiplier for FFT Computation in Biomedical Applications." In 2015 IEEE Computer Society Annual Symposium on VLSI, pp. 68-73. IEEE, 2015.
 
 \bibitem{phuse}
-A.~Phuse and P.~Tasgaonkar, ``Design and implementation of different
-multiplier techniques and efficient MAC unit on FPGA,'' in \emph{Proc.
-Int. Conf. Signal Inf. Process. (ICONSIP)}, 2022, pp.~1--5.
+Phuse, Ashish S., and Pankaj P. Tasgaonkar. "Design and implementation of different multiplier techniques and efficient MAC unit on FPGA." In 2022 International Conference on Signal and Information Processing (IConSIP), pp. 1-5. IEEE, 2022.
 
 \bibitem{prabhu}
-A.~S. Prabhu and V.~Elakya, ``Design of modified low power Booth
-multiplier,'' in \emph{Proc. Int. Conf. Comput. Commun. Appl.}, 2012,
-pp.~1--6.
-
-\bibitem{kumar}
-C.~U. Kumar and B.~J. Rabi, ``Design and implementation of modified
-Russian Peasant multiplier using MSQRTCSLA based FIR filter,''
-\emph{Indian J. Sci. Technol.}, vol.~9, no.~7, 2016.
+Prabhu, A. S., and V. Elakya. "Design of modified low power booth multiplier." In 2012 International conference on computing, communication and applications, pp. 1-6. IEEE, 2012.
 
 \bibitem{gokhale}
-G.~R. Gokhale and P.~D. Bahirgonde, ``Design of Vedic multiplier using
-area-efficient carry select adder,'' in \emph{Proc. Int. Conf. Adv.
-Comput. Commun. Informat. (ICACCI)}, 2015, pp.~576--581.
+Gokhale, G. R., and P. D. Bahirgonde. "Design of Vedic-multiplier using area-efficient Carry Select Adder." In 2015 International conference on Advances in computing, Communications and Informatics (ICACCI), pp. 576-581. IEEE, 2015.
 
 \bibitem{bansal}
-Y.~Bansal, C.~Madhu, and P.~Kaur, ``High speed Vedic multiplier
-designs---a review,'' in \emph{Proc. Recent Adv. Eng. Comput. Sci.
-(RAECS)}, 2014, pp.~1--6.
-
-\bibitem{rao}
-E.~J. Rao, T.~Ramanjaneyulu, and K.~J. Kumar, ``Advanced multiplier
-design and implementation using Han-Carlson adder,'' in \emph{Proc.
-Int. Conf. Intell. Innov. Comput. Appl. (ICONIC)}, 2018, pp.~1--5.
-
-\bibitem{dhole}
-S.~Dhole, S.~Shembalkar, T.~Yadav, and P.~Thakre, ``Design and FPGA
-implementation of 4$\times$4 Vedic multiplier using different
-architectures,'' \emph{Int. J. Eng. Res. Technol.}, vol.~6, no.~4, 2017.
-
-\bibitem{penchalaiah}
-U.~Penchalaiah and S.~K. VG, ``Design of high-speed and energy-efficient
-parallel prefix Kogge-Stone adder,'' in \emph{Proc. IEEE Int. Conf.
-Syst. Comput. Autom. Netw. (ICSCAN)}, 2018, pp.~1--7.
-
-\bibitem{raju}
-A.~Raju and S.~K. Sa, ``Design and performance analysis of multipliers
-using Kogge-Stone adder,'' in \emph{Proc. Int. Conf. Appl. Theor.
-Comput. Commun. Technol. (iCATccT)}, 2017, pp.~94--99.
-
-\bibitem{gunasekaran}
-K.~Gunasekaran and M.~Manikandan, ``High speed reconfigurable FIR filter
-using Russian Peasant multiplier with Sklansky adder,'' \emph{Res. J.
-Appl. Sci. Eng. Technol.}, vol.~8, no.~24, pp.~2451--2456, 2014.
-
-\bibitem{paz}
-P.~Paz and M.~Garrido, ``Efficient implementation of complex multipliers
-on FPGAs using DSP slices,'' \emph{J. Signal Process. Syst.}, vol.~95,
-no.~4, pp.~543--550, 2023.
+Bansal, Yogita, Charu Madhu, and Pardeep Kaur. "High speed vedic multiplier designs-A review." 2014 Recent Advances in Engineering and Computational Sciences (RAECS) (2014): 1-6.
 
 \bibitem{khurshid}
-B.~Khurshid, ``FPGA-based resource-optimal approximate multiplier for
-error-resilient applications,'' \emph{Int. J. Circuit Theory Appl.},
-2024.
+Khurshid, Burhan. "FPGA‐Based Resource‐Optimal Approximate Multiplier for Error‐Resilient Applications." International Journal of Circuit Theory and Applications 53, no. 9 (2025): 5518-5537.
 
 \bibitem{approx2025}
-A.~K, S.~Sushma, and V.~S. Teja, ``Improving error resilience in
-FPGA-based multi-level approximate multipliers using modified full
-adders,'' in \emph{Proc. Int. Conf. Device Intell. Comput. Commun.
-Technol. (DICCT)}, 2025, pp.~153--158.
+Arunkumar, K., S. Sushma, and Vangala Siva Teja. "Improving Error Resilience in FPGA-Based Multi-Level Approximate Multipliers Using Modified Full Adders." In 2025 3rd International Conference on Device Intelligence, Computing and Communication Technologies (DICCT), pp. 153-158. IEEE, 2025.
 
-\bibitem{anjana}
-R.~Anjana, B.~Abishna, M.~S. Harshitha, E.~Abhishek, V.~Ravichandra, and
-M.~S. Suma, ``Implementation of Vedic multiplier using Kogge-Stone
-adder,'' in \emph{Proc. Int. Conf. Embedded Syst. (ICES)}, 2014,
-pp.~28--31.
+\bibitem{base}
+TN, Deepika Sree, and S. Aditya. "A Low cost area-efficient modified Russian peasant multiplier (MRPM) for biomedical applications." Integration (2025): 102474.
 
 \bibitem{abed}
-S.~Abed, B.~J. Mohd, Z.~Al-bayati, and S.~Alouneh, ``Low power Wallace
-multiplier design based on wide counters,'' \emph{Int. J. Circuit Theory
-Appl.}, vol.~40, no.~11, pp.~1175--1185, 2012.
+Abed, Sa'ed, Bassam Jamil Mohd, Zaid Al‐bayati, and Sahel Alouneh. "Low power Wallace multiplier design based on wide counters." International Journal of Circuit Theory and Applications 40, no. 11 (2012): 1175-1185.
 
 \bibitem{badawi}
-A.~Badawi, A.~Alqarni, A.~Aljuffri, M.~S. BenSaleh, A.~M. Obeid, and
-S.~M. Qasim, ``FPGA realization and performance evaluation of
-fixed-width modified Baugh-Wooley multiplier,'' in \emph{Proc. Int.
-Conf. Technol. Adv. Electr. Electron. Comput. Eng. (TAEECE)}, 2015,
-pp.~155--158.
+Badawi, Aiman, Ali Alqarni, Abdullah Aljuffri, Mohammed S. BenSaleh, Abdulfattah M. Obeid, and Syed Manzoor Qasim. "FPGA realization and performance evaluation of fixed-width modified Baugh-Wooley multiplier." In 2015 Third International Conference on Technological Advances in Electrical, Electronics and Computer Engineering (TAEECE), pp. 155-158. IEEE, 2015.
+
+\bibitem{paz}
+Paz, Pedro, and Mario Garrido. "Efficient implementation of complex multipliers on FPGAs using DSP slices." Journal of Signal Processing Systems 95, no. 4 (2023): 543-550.
+
+\bibitem{kumar}
+Kumar, C. Uthaya, and B. Justus Rabi. "Design and implementation of modified russian peasant multiplier using msqrtcsla based fir filter." Indian Journal of Science and Technology 9, no. 7 (2016): 1-6.
+
+\bibitem{gunasekaran}
+Gunasekaran, K., and M. Manikandan. "High speed reconfigurable FIR filter using Russian peasant multiplier with Sklansky adder." Research Journal of Applied Sciences, Engineering and Technology 8, no. 24 (2014): 2451-2456.
+
+\bibitem{rao}
+Rao, E. Jagadeeswara, T. Ramanjaneyulu, and K. Jayaram Kumar. "Advanced multiplier design and implementation using Han-Carlson adder." In 2018 International Conference on Intelligent and Innovative Computing Applications (ICONIC), pp. 1-5. IEEE, 2018.
+
+\bibitem{penchalaiah}
+Penchalaiah, U., and Siva Kumar Vg. "Design of high-speed and energy-efficient parallel prefix kogge stone adder." In 2018 IEEE International Conference on System, Computation, Automation and Networking (ICSCA), pp. 1-7. IEEE, 2018.
+
+\bibitem{raju}
+Raju, Aradhanan, and Sudhir Kumar Sa. "Design and performance analysis of multipliers using Kogge Stone Adder." In 2017 3rd International Conference on Applied and Theoretical Computing and Communication Technology (iCATccT), pp. 94-99. IEEE, 2017.
+
+\bibitem{anjana}
+Anjana, R., B. Abishna, M. S. Harshitha, E. Abhishek, V. Ravichandra, and M. S. Suma. "Implementation of vedic multiplier using Kogge-stone adder." In 2014 International Conference on Embedded Systems (ICES), pp. 28-31. IEEE, 2014.
 
 \bibitem{tangnano}
 Sipeed, ``Tang Nano 9K FPGA development board (Gowin GW1NR-9)
